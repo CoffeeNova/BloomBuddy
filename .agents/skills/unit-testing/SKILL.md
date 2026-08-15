@@ -7,7 +7,7 @@ description: How to write and run the BloomBuddy unit tests (luaunit + luacov un
 
 The addon is unit-tested **outside the game** under LuaJIT (Lua 5.1 — the same version WoW uses). No game client needed. Coverage target: **≥ 90%** of all non-UI modules. `Classes/Frames.lua` and `Classes/OptionsUI.lua` are UI-heavy and expected to be excluded or lightly covered.
 
-> **Status:** the `Tests/` suite does NOT exist yet — it is Phase 3 of the development plan (`.github/docs/addon-v1-development-plan.md`). The harness described below is a port of the one proven in the sibling workspace **ArenaChillPrep** (same client, same module conventions).
+> **Status:** the `Tests/` suite does NOT exist yet — it is Phase 3 of the development plan (`.agents/docs/addon-v1-development-plan.md`). The harness described below is a port of the one proven in the sibling workspace **ArenaChillPrep** (same client, same module conventions).
 
 ## When to touch the tests
 

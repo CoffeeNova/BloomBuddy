@@ -23,7 +23,7 @@
 -- VERIFY (in game) before trusting: the Lifebloom spell IDs (33763 R1 confirmed; R2/R3
 -- unlearned on the tester), that `CompactUnitFrame_UpdateAll` fires for
 -- `CompactPartyFrameMember<N>` / `CompactRaidFrame<N>`, and the overlay placement. See
--- .github/skills/unit-frame-buffs/SKILL.md.
+-- .agents/skills/unit-frame-buffs/SKILL.md.
 
 ---@type BB
 local _, BB = ...;

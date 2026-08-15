@@ -2,7 +2,7 @@
 
 Shows a big **Lifebloom** icon on **party and raid frames** in World of Warcraft: TBC Anniversary (Classic). Nothing more, nothing less.
 
-> For developers and AI agents: technical docs live in `AGENTS.md` and the `.github/` directory (context and architecture). `README.md` is for players.
+> For developers and AI agents: technical docs live in `AGENTS.md` and the `.agents/` directory (context and architecture). `README.md` is for players.
 
 ## What it does
 
@@ -46,7 +46,7 @@ All settings persist between sessions.
 
 ## Development
 
-See `AGENTS.md` → `.github/` (context, architecture, and the development plan).
+See `AGENTS.md` → `.agents/` (context, architecture, and the development plan).
 
 ## Changelog
 

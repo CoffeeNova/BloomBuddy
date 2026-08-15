@@ -11,10 +11,10 @@
 - **Stacks fix:** stack count is read from `aura.applications or aura.charges` — `.count` is NOT the field on this client (verified: BigDebuffs, BetterBlizzFrames, ArenaAnalytics). The stacks text was previously always blank.
 - **In-game verification (2026-08-15, user):** `CompactUnitFrame_UpdateBuff` = `nil`, `CompactUnitFrame_UpdateAll` = `function`, `CompactPartyFrameMember1` is a real frame with `unit="player"` and `displayedUnit` populated; Lifebloom spell ID `33763` (R1) confirmed via `GetSpellInfo`; show/hide works per member and per aura, `/bb enable`/`/bb disable` lifecycle works; `aura.applications` returns the stack count. `CompactRaidFrame1` is `nil` outside a raid (expected).
 - **Project scaffold** (v0.1 phase 0): `BloomBuddy.toc` (Interface 20506), `bootstrap.lua` (global `BB` table, event frame, `ADDON_LOADED` init), `Data/` (Constants, DefaultSettings, Localization), `Utils/` (Tables, Timers), `Classes/` (Events, Settings, Frames, OptionsUI).
-- **AI development library** (`.github/`): agent instructions, context/architecture, agents, skills, prompt templates, PowerShell tools, development plan.
+- **AI development library** (`.agents/`): agent instructions, context/architecture, agents, skills, prompt templates, PowerShell tools, development plan.
 - **Slash commands**: `/bb` (status), `/bb enable`, `/bb disable`, `/bb timer`, `/bb debug`, `/bb help`.
 - **Settings** (`BloomBuddyDB`): `enabled`, `scale` (default 1.5), `party`, `raid`, `showTimer` (default false).
-- **Static analysis**: the **luahelper MCP** server as the repo's Lua lint gate — see `.github/CONTEXT.md` and `AGENTS.md`.
+- **Static analysis**: the **luahelper MCP** server as the repo's Lua lint gate — see `.agents/CONTEXT.md` and `AGENTS.md`.
 
 ### Changed
 
@@ -28,10 +28,10 @@
 - **`Classes/Frames.lua` rewritten:** tracks compact frames via the `CompactUnitFrame_UpdateAll` hook (the real hook point on 2.5.6 — `CompactUnitFrame_UpdateBuff` does not exist), reads `frame.displayedUnit or frame.unit`, shows/hides an overlay icon (base 20 px × scale, anchored bottom-left, tunable), refreshed by the hook + `UNIT_AURA` / `GROUP_ROSTER_UPDATE` + a 0.5 s safety ticker.
 - **Ticker lifecycle fixed:** `/bb enable` now starts the safety ticker and `/bb disable` stops it and hides overlays (previously the ticker was only started at load, so enable-after-load never ran).
 - **`Data/Constants.lua`:** added `MAX_AURA_SCAN`, `OVERLAY_BASE_SIZE`, `OVERLAY_ANCHOR` / offsets / frame level, `SHOW_TIMER`/`SHOW_STACKS` + text anchors/sizes; removed the unused `MAX_PARTY_BUFFS` / `MAX_RAID_BUFFS`.
-- **Docs:** `README.md`, `.github/CONTEXT.md`, `.github/ARCHITECTURE.md`, the `unit-frame-buffs` and `wow-api-20506` skills, and the development plan updated to the overlay design, the swipe + opt-in timer, the `.applications` stack field, the OmniCC opt-out, and the verified client facts.
+- **Docs:** `README.md`, `.agents/CONTEXT.md`, `.agents/ARCHITECTURE.md`, the `unit-frame-buffs` and `wow-api-20506` skills, and the development plan updated to the overlay design, the swipe + opt-in timer, the `.applications` stack field, the OmniCC opt-out, and the verified client facts.
 
 ### Notes
 
-- Lifebloom R1 spell ID `33763` is verified; R2/R3 (`48450`/`48451`) were not learned on the tester and the swipe/stacks/timer rendering plus the overlay placement/size are **pending final in-game acceptance** — see `.github/docs/addon-v1-development-plan.md`. Round-3 feedback (2026-08-15): the cooldown swipe was not visible and OmniCC's countdown numbers could not be toggled off — addressed by `noCooldownCount = true`, show-before-sweep ordering, and a `/bb debug` overlay dump; re-verify in game.
+- Lifebloom R1 spell ID `33763` is verified; R2/R3 (`48450`/`48451`) were not learned on the tester and the swipe/stacks/timer rendering plus the overlay placement/size are **pending final in-game acceptance** — see `.agents/docs/addon-v1-development-plan.md`. Round-3 feedback (2026-08-15): the cooldown swipe was not visible and OmniCC's countdown numbers could not be toggled off — addressed by `noCooldownCount = true`, show-before-sweep ordering, and a `/bb debug` overlay dump; re-verify in game.
 - Hiding the native small Lifebloom icon per-buff is **impossible on this client** (C-rendered icons); hiding all compact-frame buffs is all-or-nothing and is future work.
 - The automated unit-test suite (`Tests/`) is planned, not yet created (Phase 3).

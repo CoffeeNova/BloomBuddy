@@ -1,6 +1,6 @@
 # BloomBuddy — gotchas (verified on the client)
 
-Client-verified pitfalls for the WoW TBC Anniversary (Interface 20506 / 2.5.x) client. These are ALSO mirrored in `.github/skills/wow-api-20506/SKILL.md` and `.github/skills/unit-frame-buffs/SKILL.md` — keep all three in sync.
+Client-verified pitfalls for the WoW TBC Anniversary (Interface 20506 / 2.5.x) client. These are ALSO mirrored in `.agents/skills/wow-api-20506/SKILL.md` and `.agents/skills/unit-frame-buffs/SKILL.md` — keep all three in sync.
 
 ## Compact-frame buff icons are C-rendered (2026-08, verified)
 

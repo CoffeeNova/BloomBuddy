@@ -1,6 +1,6 @@
 # BloomBuddy — repo memory
 
-Working record for AI agents. Source of truth is `.github/`; this mirrors verified outcomes and phase status.
+Working record for AI agents. Source of truth is `.agents/`; this mirrors verified outcomes and phase status.
 
 ## Status (2026-08-15)
 

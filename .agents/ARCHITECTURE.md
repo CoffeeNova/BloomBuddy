@@ -79,7 +79,7 @@ BB.Events:fire(event, ...)
 
 ### 2.3 `Classes/Settings.lua` and `Data/DefaultSettings.lua`
 
-- `BloomBuddyDB` — SavedVariables (see `.github/CONTEXT.md`).
+- `BloomBuddyDB` — SavedVariables (see `.agents/CONTEXT.md`).
 - `Settings:get(path)` / `Settings:set(path, value)` — access by dot path (`"scale"`, `"party"`).
 - On load — deep merge of defaults and saved data (robust against new settings added in future versions) + `ensureDefaults` migration.
 
@@ -227,7 +227,7 @@ sequenceDiagram
 5. **Match the full rank list.** Lifebloom R1/R2/R3 are distinct spellIDs; matching all three avoids missing icons.
 6. **Settings via dot paths.** `Settings:get("scale")` — trivial to extend (e.g. a future per-frame scale).
 7. **Swipe is the default remaining-time display; digital is opt-in.** The native `Cooldown` widget is the proven client pattern (BigDebuffs, ClassicAuraDurations, M6) and animates without Lua. The digital countdown (`showTimer`, default off, `/bb timer`) is the alternative for users who prefer numbers.
-8. **Port ArenaChillPrep's infrastructure, not its features.** The `BB` vararg chain, `Events`/`Settings`/`Timers`/`Tables` modules, `.github/` tooling and test conventions are a lean port from the sibling addon (same client) — keep them consistent.
+8. **Port ArenaChillPrep's infrastructure, not its features.** The `BB` vararg chain, `Events`/`Settings`/`Timers`/`Tables` modules, `.agents/` tooling and test conventions are a lean port from the sibling addon (same client) — keep them consistent.
 
 ---
 

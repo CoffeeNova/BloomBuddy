@@ -1,6 +1,6 @@
 -- BloomBuddy — Classes/OptionsUI
 -- Slash commands (/bb) + status. A full Interface Options panel is Phase 3
--- (see .github/docs/addon-v1-development-plan.md); the Settings canvas API
+-- (see .agents/docs/addon-v1-development-plan.md); the Settings canvas API
 -- gotchas live in the wow-api-20506 skill.
 
 ---@type BB
