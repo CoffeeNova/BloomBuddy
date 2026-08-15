@@ -101,6 +101,33 @@ and its path must never be hardcoded here.
 `<addon>-<version>.zip` (version read from the `.toc`). The zip contains exactly
 the game artifacts — the same file set as a client deploy. `dist/` is never committed.
 
+## Release pipeline (CI/CD)
+
+`.github/workflows/release.yml` — GitHub Actions. Note: this is the ONE path that
+stays under `.github/` (a platform requirement — Actions must live in
+`.github/workflows/`); the AI library lives in `.agents/`). Auto-releases on every
+push to `main`, on `v*` tag pushes, and on manual dispatch:
+
+1. **Version** — from git tags, common CurseForge notation `vMAJOR.MINOR.PATCH`:
+   on a tag push that exact version is used (skipped if the release already
+   exists); on a plain `main` push the patch is bumped from the latest `v*` tag
+   (`0.1.0` if there are none). The version is NOT committed back — tags are the
+   source of truth; the bump happens only in the CI checkout.
+2. **Bundle** — the TOC `## Version:` is rewritten to the computed version and
+   `tools/deploy.ps1 -Bundle` produces `BloomBuddy-<version>.zip` (the exact
+   artifact set of a client deploy).
+3. **GitHub release** — `gh release create v<version>` with the zip attached and
+   a changelog of commits since the previous tag.
+4. **CurseForge** — uploads the zip to the project id from the TOC
+   `## X-Curse-Project-ID:` line (`0` = skip with a warning) using the CurseForge
+   upload API: `wow.curseforge.com/api/game/wow/versions` (filter
+   `gameVersionTypeID` 73246 = TBC Classic; game version `2.5.6` is derived from
+   the TOC `## Interface:` 20506, falling back to the next-lower version) then
+   `api/projects/<id>/upload-file` (release type = release, markdown changelog).
+   Requires the **`CF_API_KEY`** repo secret (CurseForge project API token);
+   without it the job is skipped with a warning. The pipeline was verified live
+   against the versions endpoint (2026-08-15): 2.5.6 = id 16533.
+
 ---
 
 ## Code conventions
