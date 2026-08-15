@@ -52,7 +52,9 @@ jobs:
         run: |
           $tags = @(git tag --list 'v*' 2>$null)
           $semverTags = @($tags | Where-Object { $_ -match '^v?\d+\.\d+\.\d+$' } | Sort-Object { [version]$_.TrimStart('v') })
-          $exactTag = git describe --tags --exact-match HEAD 2>$null
+          # git describe would exit 128 with no tags and poison $LASTEXITCODE,
+          # which the runner's pwsh wrapper turns into a step failure.
+          $exactTag = git tag --list --points-at HEAD 'v*' 2>$null | Select-Object -First 1
           $shouldRelease = "true"
           if ($exactTag) {
             if ($exactTag -notmatch '^v\d+\.\d+\.\d+$') {
