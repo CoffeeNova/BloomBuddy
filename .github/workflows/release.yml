@@ -245,12 +245,14 @@ jobs:
           }
           $changelog = "# BloomBuddy $env:VERSION`n`n" + (($commits | ForEach-Object { "- $_" }) -join "`n")
 
+          # The CurseForge API expects string enums ("release"/"markdown") and the
+          # file as a FileInfo object (a string path is sent as a plain form field).
           $metadata = @{
             displayName   = "BloomBuddy v$env:VERSION"
             gameVersions  = @([int]$match.id)
-            releaseType   = 1
+            releaseType   = "release"
             changelog     = $changelog
-            changelogType = 3
+            changelogType = "markdown"
           } | ConvertTo-Json -Depth 5
 
           $zip = Get-ChildItem dist -Recurse -Filter *.zip | Select-Object -First 1
@@ -258,5 +260,5 @@ jobs:
           $result = Invoke-RestMethod -Method Post `
             -Uri "https://wow.curseforge.com/api/projects/$projectId/upload-file" `
             -Headers $headers `
-            -Form @{ metadata = $metadata; file = $zip.FullName }
+            -Form @{ metadata = $metadata; file = Get-Item $zip.FullName }
           Write-Host "Uploaded to CurseForge: $($result.displayName) (file id $($result.id))"
