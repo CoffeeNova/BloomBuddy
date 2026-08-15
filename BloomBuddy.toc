@@ -1,0 +1,29 @@
+## Interface: 20506
+## Title: BloomBuddy
+## Notes: Makes the Lifebloom buff icon bigger on party and raid frames (TBC Anniversary).
+## Author: BloomBuddy
+## Version: 0.1.0
+## License: MIT
+## SavedVariables: BloomBuddyDB
+## DefaultState: enabled
+
+# Load order matters: bootstrap first, then Data/Utils, then Classes.
+# Every file receives the shared BB table through the `...` vararg chain
+# (each module file must end with `return BB;`).
+
+bootstrap.lua
+
+Data/Constants.lua
+Data/DefaultSettings.lua
+Data/Localization.lua
+
+Utils/Tables.lua
+Utils/Timers.lua
+
+Classes/Events.lua
+Classes/Settings.lua
+Classes/Frames.lua
+Classes/OptionsUI.lua
+
+# Unit tests run OUTSIDE the game (LuaJIT) — see Tests/run-tests.ps1 (planned).
+# Nothing in Tests/ is loaded by the game.
