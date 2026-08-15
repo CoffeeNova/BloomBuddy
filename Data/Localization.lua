@@ -15,12 +15,13 @@ local DefaultLocale = "enUS";
 local strings = {
     enUS = {
         loaded = "v%s loaded",
-        status = "enabled: %s | scale: %.1fx | party: %s | raid: %s",
-        help = "BloomBuddy commands: status, enable, disable, debug, help",
+        status = "enabled: %s | scale: %.1fx | party: %s | raid: %s | timer: %s",
+        help = "BloomBuddy commands: status, enable, disable, timer, debug, help",
         unknownCommand = "Unknown command: %s. Type /bb help",
         enabled = "Addon enabled",
         disabled = "Addon disabled",
         debugToggled = "Debug logging: %s",
+        timerToggled = "Digital countdown: %s",
         scaledIcons = "Scaled %d Lifebloom icon(s)",
 
         -- Options panel (Phase 3)
@@ -34,12 +35,13 @@ local strings = {
     },
     ruRU = {
         loaded = "v%s загружен",
-        status = "включён: %s | масштаб: %.1fx | party: %s | raid: %s",
-        help = "BloomBuddy команды: status, enable, disable, debug, help",
+        status = "включён: %s | масштаб: %.1fx | party: %s | raid: %s | timer: %s",
+        help = "BloomBuddy команды: status, enable, disable, timer, debug, help",
         unknownCommand = "Неизвестная команда: %s. Введите /bb help",
         enabled = "Аддон включён",
         disabled = "Аддон выключен",
         debugToggled = "Отладка: %s",
+        timerToggled = "Цифровой отсчёт: %s",
         scaledIcons = "Увеличено иконок Lifebloom: %d",
 
         -- Options panel (Phase 3)

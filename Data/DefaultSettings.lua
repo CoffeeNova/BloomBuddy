@@ -13,6 +13,7 @@ BB.Data.DefaultSettings = {
     scale = 1.5,        -- Icon size multiplier (baseSize * scale).
     party = true,       -- Scale on party frames.
     raid = true,        -- Scale on raid frames.
+    showTimer = false,  -- Digital countdown on the overlay (default off; the cooldown swipe is always shown).
 };
 
 return BB;

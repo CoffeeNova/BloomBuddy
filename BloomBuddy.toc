@@ -24,6 +24,3 @@ Classes/Events.lua
 Classes/Settings.lua
 Classes/Frames.lua
 Classes/OptionsUI.lua
-
-# Unit tests run OUTSIDE the game (LuaJIT) — see Tests/run-tests.ps1 (planned).
-# Nothing in Tests/ is loaded by the game.

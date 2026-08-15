@@ -32,7 +32,8 @@ local function showStatus()
         tostring(BB.Settings:get("enabled")),
         tonumber(BB.Settings:get("scale")) or 1,
         tostring(BB.Settings:get("party")),
-        tostring(BB.Settings:get("raid")));
+        tostring(BB.Settings:get("raid")),
+        tostring(BB.Settings:get("showTimer") ~= false));
 
     local scaled = BB.Frames:checkNow();
     BB:print(BB.L.scaledIcons, scaled);
@@ -51,13 +52,23 @@ local function handleInput(input)
         showStatus();
     elseif (command == "enable") then
         BB.Settings:set("enabled", true);
+        BB.Frames:ensureTicker();
+        BB.Frames:checkNow();
         BB:print(BB.L.enabled);
     elseif (command == "disable") then
         BB.Settings:set("enabled", false);
+        BB.Frames:stopTicker();
+        BB.Frames:checkNow();
         BB:print(BB.L.disabled);
+    elseif (command == "timer") then
+        local showTimer = BB.Settings:get("showTimer") ~= false;
+        BB.Settings:set("showTimer", not showTimer);
+        BB.Frames:checkNow();
+        BB:print(BB.L.timerToggled, tostring(not showTimer));
     elseif (command == "debug") then
         BB.debug = not BB.debug;
         BB:print(BB.L.debugToggled, BB.debug and "on" or "off");
+        BB.Frames:dumpOverlays();
     elseif (command == "help") then
         printHelp();
     else

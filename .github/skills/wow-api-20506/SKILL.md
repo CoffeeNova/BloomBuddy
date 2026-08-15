@@ -29,6 +29,9 @@ If a WoW API call errors or returns nonsense on this client, **check this list f
 | `CLASS_*` constants | **NOT defined** on TBC FrameXML — `[CLASS_DRUID] = ...` throws "table index is nil" | `local CLASS_DRUID = _G.CLASS_DRUID or "DRUID"` |
 | SavedVariables numeric keys | `[33763]` (number) and `"33763"` (string) are **DIFFERENT table keys** — dot-path get/set with string segments hit the string key while defaults use numeric | `Settings:normalizeSegment()` converts integer-looking path segments to numbers |
 | `C_Timer` handle `Cancel()` | **UNRELIABLE — a "cancelled" timer can still fire** (verified live 2026-08-10: a cancelled timer fired after the event it was meant to be cancelled by) | named timers with an `active` flag (`BB.Utils.Timers`) — `handle:Cancel()` is best-effort only |
+| `CompactUnitFrame_UpdateBuff` | **NOT hookable on TBC 2.5.6** — the function does not exist (zero references in installed addons; the C-rendered auras skip the Lua buff pipeline). `CompactUnitFrame_UpdateAuras`/`buffFrames` are also absent on 2.5.6 | the real per-frame hook is **`CompactUnitFrame_UpdateAll(frame)`** (fires per compact frame on setup/reuse; used by SweepyBoop + BigDebuffs on this client) |
+| Compact-frame buff icons | **C-rendered on 2.5.6** — no Lua-accessible per-buff icon to `SetSize`, no `buffFrames` array, **no per-buff hide filter** (you can only hide ALL buffs via `raidFramesDisplayBuffs` CVar / "display buffs" option, all-or-nothing) | draw a **custom overlay icon** on the frame (SweepyBoop pattern): child frame + texture, unit from `frame.displayedUnit or frame.unit`, detect by spellID via `GetAuraDataByIndex` |
+| `frame.auraSize` (compact frames) | Scales **ALL** buffs+debuffs of a member uniformly; often nil until an addon writes it; the C layout only re-reads it on a full `CompactUnitFrame_UpdateAll` | do NOT use it to single out one buff — that is not possible |
 
 ## Verified working patterns
 
@@ -69,10 +72,15 @@ end
 
 ## Unit frame buffs (the core feature — see the `unit-frame-buffs` skill)
 
-- **Party frames:** `PartyMemberFrame1..4` (buffs under a per-member buff container). The exact child naming/count on 2.5.x is **to be verified in game** — check against working addons before hardcoding paths.
-- **Raid frames:** buffs are drawn by `CompactUnitFrame_UpdateBuff(unitButton, index, numBuffs, isDebuff)` — a stable global hook point used by frame addons on this client; `unitButton.unit` is populated.
-- **Matching:** by **spellID** via `GetAuraDataByIndex` where possible; **texture fallback** (`icon:GetTexture() == GetSpellTexture(id)`) when no aura object is available for an index.
-- **Resize only the icon texture** (`SetSize`). Store the base size once per icon — do NOT compound the scale on repeated re-applies.
+- **Compact frames (raid + raid-style party) on 2.5.6:** native buff icons are **C-rendered** — no
+  Lua-accessible per-icon to resize, no per-buff hide. Real hook point: `CompactUnitFrame_UpdateAll`.
+  Frame names: `CompactPartyFrameMember<N>` / `CompactRaidFrame<N>`; unit via
+  `frame.displayedUnit or frame.unit`. Show a custom overlay icon (SweepyBoop pattern).
+- **Matching:** by **spellID** via `GetAuraDataByIndex(unit, i, "HELPFUL")`; iterate until nil.
+- **Overlay:** child frame + one texture (`GetSpellTexture` / the Lifebloom texture), sized
+  `OVERLAY_BASE_SIZE * scale`, cached on the compact frame.
+- **Classic party frames (`PartyMemberFrame1..4`):** not the v0.1 target; icons there are
+  classic-era Lua frames (`.BuffFrame.Buff<N>.Icon`), a `SetSize` path is future work.
 
 ## References to consult when unsure
 - `sArena_Reloaded/` — aura iteration, buff detection, compact raid frame interaction (same client, proven)

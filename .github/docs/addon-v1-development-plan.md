@@ -4,12 +4,18 @@
 > `phase-workflow` skill. Every phase ends with a working build that can be loaded in game
 > (`/reload`) and verified. Don't move to the next phase until the Definition of Done is met.
 
-**Target version:** v0.1 — enlarge the Lifebloom buff icon on party and raid frames.
+**Target version:** v0.1 — show an enlarged Lifebloom icon on party and raid frames.
 
 **Game:** WoW TBC Anniversary, Interface `20506`.
 
-**Current state:** Phase 0 (scaffold) is done. Phases 1–2 need in-game verification (the exact
-frame paths and the spell IDs must be confirmed on the 2.5.x client).
+**Current state:** Phase 0 (scaffold) is done. The design was revised after client research
+(2026-08): on this client the native buff icons on compact frames (raid + raid-style party) are
+**C-rendered** — they cannot be resized or hidden per-buff. The feature is implemented as a
+**custom Lifebloom overlay icon** on compact frames (the SweepyBoop pattern, verified on the same
+client). Core mechanics are verified in game (2026-08-15): spell ID `33763` (R1), the
+`CompactUnitFrame_UpdateAll` hook, `CompactPartyFrameMember<N>` frames, show/hide, `/bb` enable/
+disable. Phase 1 is implemented and pending final in-game acceptance (overlay placement +
+timer/stacks). Phase 2 (raid) verified the frames are nil outside a raid — pending a raid test.
 
 ---
 
@@ -28,7 +34,7 @@ frame paths and the spell IDs must be confirmed on the 2.5.x client).
 - [x] `Data/Localization.lua`: enUS + ruRU minimal strings.
 - [x] `Utils/Tables.lua`, `Utils/Timers.lua` (ported from ArenaChillPrep, same client).
 - [x] `Classes/Events.lua`, `Classes/Settings.lua` (ported, `BB` global, `BloomBuddyDB`).
-- [x] `Classes/Frames.lua` — core skeleton: spellID detection, party scaling, raid hook, ticker.
+- [x] `Classes/Frames.lua` — core skeleton: spellID detection, compact-frame overlay, safety ticker.
 - [x] `Classes/OptionsUI.lua` — `/bb` slash commands + status.
 - [x] AI library: `AGENTS.md`, `.github/` (CONTEXT, ARCHITECTURE, agents, skills, prompts, tools, docs), `.env.example`, `.gitignore`, `LICENSE`, `luahelper.json`, `README.md`, `CHANGELOG.md`.
 
@@ -41,46 +47,49 @@ frame paths and the spell IDs must be confirmed on the 2.5.x client).
 
 ---
 
-## Phase 1 — Party frame scaling
+## Phase 1 — Compact party frame overlay
 
-**Goal:** on party frames, the Lifebloom icon of every party member is visibly larger.
+**Goal:** on raid-style (compact) party frames, a member with Lifebloom shows an enlarged Lifebloom icon.
+
+> **Design revision (2026-08, client research):** the original plan (resize `PartyMemberFrame<N>.BuffFrame.Buff<K>.Icon` via `SetSize`) is replaced by an **overlay icon** on compact frames — on 2.5.6 native compact-frame buff icons are C-rendered and cannot be resized per-buff (verified: BigDebuffs code comment + zero `CompactUnitFrame_UpdateBuff` references; SweepyBoop's overlay pattern). See `.github/skills/unit-frame-buffs/SKILL.md`.
 
 ### Tasks
 
-- [ ] **Verify in game** the party buff-frame structure on 2.5.x:
-  - `PartyMemberFrame1..4`, the buff container name and child naming (`Buff<1..N>`), the buff-icon texture path (`buff.Icon`), and the buff count per member.
-  - Confirm `C_UnitAuras.GetAuraDataByIndex("party"..n, i, "HELPFUL")` returns `.spellId` on a party unit. Use `tools/research.ps1` + the `addon-research` skill on working addons (e.g. `BuffSizeShifter`, `BigDebuffs`, `sArena_Reloaded`) if anything is unclear.
-- [ ] **Verify the Lifebloom spell IDs**: `/run for _, id in ipairs(BB.Data.Constants.LIFEBLOOM_SPELL_IDS) do print(id, GetSpellInfo(id)) end` — fix `Constants.lua` if needed (also verify `LIFEBLOOM_TEXTURE` via `GetSpellTexture`).
-- [ ] Harden `Classes/Frames.lua` party path against the verified structure.
-- [ ] Add `/bb debug` diagnostics: `party scan: scaled N icon(s)` per scan.
-- [ ] Update `.github/` docs first if the design changes (contract-first).
+- [x] **Verify in game** the client facts (see the checklist in `Classes/Frames.lua`):
+  - `CompactUnitFrame_UpdateBuff` → nil; `CompactUnitFrame_UpdateAll` → function; `CompactPartyFrameMember1` exists. ✅ (2026-08-15: `nil` / `function` / table with `unit="player"`).
+  - Confirm `C_UnitAuras.GetAuraDataByIndex("party"..n, i, "HELPFUL")` returns `.spellId` on a compact party unit. ✅ (overlay shows for the member's unit).
+- [x] **Verify the Lifebloom spell IDs**: `33763` → "Lifebloom" ✅. `48450`/`48451` returned empty (not learned on the tester) — keep in the list, confirm on a 70 Druid. `LIFEBLOOM_TEXTURE` still to verify via `GetSpellTexture`.
+- [x] Harden `Classes/Frames.lua` compact-party path (frame filter, overlay lifecycle, `pcall`-guarded creation).
+- [x] Confirm the overlay placement/size in game (anchor constant `OVERLAY_ANCHOR`, `OVERLAY_BASE_SIZE`); adjust from user feedback. (Overlay shows; size/position tuning awaited.)
+- [x] Add `/bb debug` diagnostics: `compact scan: showing N overlay(s)` per scan. ✅
+- [x] Update `.github/` docs first if the design changes (contract-first).
+- [x] **Overlay timer + stacks** (user request 2026-08-15): default display is a native **cooldown swipe** (darkening clockwise, C-driven); a **digital countdown** is opt-in (`showTimer`, default off, `/bb timer`). Stacks come from `aura.applications or aura.charges` (`.count` is NOT the field on this client — fixed after user feedback: stacks were invisible).
 
 ### Definition of Done
 
-- In a 2v2/3v3/5v5 group: a party member's Lifebloom icon is ~1.5× larger than other buffs.
-- The size persists across buff updates (hook + ticker re-apply works).
-- Disabling `/bb disable` stops scaling; `/bb enable` resumes it.
+- [x] With raid-style party frames enabled and a member holding Lifebloom: an enlarged Lifebloom icon is visible on that member's frame and hidden when Lifebloom fades. ✅
+- [x] The overlay stays correct across frame reuse / unit changes (hook + events + ticker work). ✅
+- [x] Disabling `/bb disable` stops the overlay; `/bb enable` resumes it. ✅
+- [ ] **Final acceptance (pending):** the cooldown swipe sweeps clockwise on the overlay; stacks show at 2–3 (hidden at 1); `/bb timer` toggles the digital countdown (default off); overlay placement/size look right on the party frame.
 
 ---
 
-## Phase 2 — Raid frame scaling
+## Phase 2 — Raid frame overlay
 
-**Goal:** on raid frames, the Lifebloom icon of every raid member is visibly larger.
+**Goal:** on raid frames, a member with Lifebloom shows an enlarged Lifebloom icon.
 
 ### Tasks
 
-- [ ] **Verify in game** the raid buff rendering on 2.5.x:
-  - `CompactUnitFrame_UpdateBuff(unitButton, index, numBuffs, isDebuff)` exists and is called per buff; `unitButton.unit` is populated.
-  - The buff button path used to resize the icon (`unitButton.Buff[<index>].Icon` or the equivalent) — confirm against working addons.
-  - Confirm the hook fires for a raid member's Lifebloom.
-- [ ] Harden the raid hook in `Classes/Frames.lua`; keep the SecureHook → manual-wrapper fallback.
-- [ ] Add `/bb debug` diagnostics: `raid hook: scaled N icon(s)`.
-- [ ] Update `.github/` docs first if the design changes.
+- [ ] **Verify in game** that `CompactUnitFrame_UpdateAll` fires for `CompactRaidFrame<N>` and `frame.displayedUnit` is populated for raid units. (2026-08-15: `CompactRaidFrame1` is nil outside a raid — expected; needs a raid to confirm.)
+- [x] Harden the raid path in `Classes/Frames.lua` (same overlay machinery as party; frame-name gate: `CompactRaid*` → `raid` setting).
+- [ ] Confirm overlay placement on a raid frame (same anchor as party; adjust from user feedback).
+- [x] Add `/bb debug` diagnostics: `compact scan: showing N overlay(s)` (shared with party). ✅
+- [x] Update `.github/` docs first if the design changes.
 
 ### Definition of Done
 
-- In a raid: a member's Lifebloom icon is larger than other buffs and stays so across updates.
-- Party and raid can be toggled independently (`party`/`raid` settings).
+- [ ] In a raid: a member's Lifebloom icon is shown enlarged and stays correct across updates.
+- [x] Party and raid can be toggled independently (`party`/`raid` settings). ✅ (settings gate by frame-name prefix; raid path shares the machinery)
 
 ---
 
@@ -106,7 +115,7 @@ frame paths and the spell IDs must be confirmed on the 2.5.x client).
 | Phase | Estimate |
 |---|---|
 | 0. Scaffold | 1–2 h (done) |
-| 1. Party frames | 1–2 h |
-| 2. Raid frames | 1–2 h |
+| 1. Compact party overlay | 1–2 h |
+| 2. Raid overlay | 1–2 h |
 | 3. Settings/UI/tests/release | 3–5 h |
 | **Total** | **~6–11 h** |
