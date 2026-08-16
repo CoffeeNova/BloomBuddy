@@ -3,7 +3,7 @@
 > Source of truth: this directory (`.agents/`). Entry point: `AGENTS.md` at the repo root.
 > This file is the main source of context when working on the addon. **Read `ARCHITECTURE.md` before changing any code.**
 
-**Current status:** v0.1 in development — design changed after client research (2026-08): on TBC Anniversary 2.5.6 the native buff icons on **compact frames** (raid frames and raid-style party frames) are **rendered by the game engine (C)**, so a single buff icon cannot be resized via Lua. The core feature is implemented as a **custom Lifebloom overlay icon** drawn on the compact frame (the pattern proven by SweepyBoop on the same client). Remaining time is shown as a native **cooldown swipe** (darkening clockwise, C-driven); a **digital countdown is opt-in** (`showTimer`, default off, `/bb timer`). The overlay shows the **stack count** (`aura.applications`, hidden at ≤ 1). Core mechanics verified in game (2026-08-15): spell ID `33763` (R1), the `CompactUnitFrame_UpdateAll` hook, the `CompactPartyFrameMember<N>` frames, show/hide on apply, `/bb enable`/`disable`. Round-3 feedback (2026-08-15): stacks render but the cooldown swipe was not visible and OmniCC (installed on the tester's client) drew countdown numbers that `/bb timer` could not hide — fixed via `noCooldownCount = true` + show-before-sweep ordering + a `/bb debug` overlay dump; **final acceptance pending**.
+**Current status:** v0.1 in development — design changed after client research (2026-08): on TBC Anniversary 2.5.6 the native buff icons on **compact frames** (raid frames and raid-style party frames) are **rendered by the game engine (C)**, so a single buff icon cannot be resized via Lua. The core feature is implemented as a **custom Lifebloom overlay icon** drawn on the compact frame (the pattern proven by SweepyBoop on the same client). Remaining time is shown as a native **cooldown swipe** (darkening clockwise, C-driven; toggleable via `showSwipe`); a **digital countdown is opt-in** (`showTimer`, default off, `/bb timer`). The overlay shows the **stack count** (`aura.applications`, hidden at ≤ 1). Core mechanics verified in game (2026-08-15): spell ID `33763` (R1), the `CompactUnitFrame_UpdateAll` hook, the `CompactPartyFrameMember<N>` frames, show/hide on apply, `/bb enable`/`disable`. Round-3 feedback (2026-08-15): stacks render but the cooldown swipe was not visible and OmniCC (installed on the tester's client) drew countdown numbers that `/bb timer` could not hide — fixed via `noCooldownCount = true` + show-before-sweep ordering + a `/bb debug` overlay dump; **final acceptance pending**. The **settings window** (`.agents/docs/settings-ui-plan.md`) is implemented: `/bb options` opens a minimal Blizzard-style dialog (drag, close, help tooltip, reset, size slider live-applied, position sliders persisted-but-inert, showSwipe/showTimer checkboxes). Round-2 UI feedback (2026-08-17): the template's close button is NOT reachable via the `$parentCloseButton` global (two overlapping X's again — fixed via child enumeration, exactly ONE X) and the row spacing was uneven (fixed: one uniform `ROW_GAP` between every adjacent row, window height computed). Round-3 UI feedback (2026-08-17): the "?" help button sat away from the top-left corner (the title band is inset from the frame edge — now anchored to the window corner `TOPLEFT (2, -2)`) and the Reset button drifted left of center (the check box's own center is offset by its label compensation — now anchored with a `+checkBlockHalfWidth` X-offset). Round-4 UI feedback (2026-08-17): at the corner the "?" background overlapped the template's ~10 px border ring — now anchored `TOPLEFT (CORNER_INSET, -CORNER_INSET)` with `CORNER_INSET = 10`, fully inside the border and visually mirrored to the X. **In-game verification pending.**
 
 ---
 
@@ -68,7 +68,7 @@ BloomBuddy/
 │   ├── Events.lua            # Event frame wrapper / internal event bus
 │   ├── Settings.lua          # SavedVariables wrapper (BloomBuddyDB)
 │   ├── Frames.lua            # CORE: Lifebloom detection + icon scaling (party/raid)
-│   └── OptionsUI.lua         # /bb slash commands + status (full panel: later phase)
+│   └── OptionsUI.lua         # /bb slash commands + status + options window (/bb options)
 └── Utils/                    # Utilities
     ├── Tables.lua            # Table helpers (deepMerge, shallowCopy)
     └── Timers.lua            # Named timers via C_Timer (after/interval/cancel)
@@ -176,7 +176,7 @@ Before writing or running tests, read the `unit-testing` skill
 4. **Lifebloom has several ranks.** A member may hold R1/R2/R3 (spell IDs `33763`/`48450`/`48451`). Match by spellID against the full list. `33763` is VERIFIED in game; R2/R3 unlearned on the tester — confirm before trusting. (Check: `/run for _, id in ipairs(BB.Data.Constants.LIFEBLOOM_SPELL_IDS) do print(id, GetSpellInfo(id)) end`)
 5. **Overlay lifecycle.** The overlay is a child frame (`frame.BB_LifebloomOverlay`) created once per tracked compact frame, shown/hidden by the aura scan. The 0.5 s ticker + `UNIT_AURA` + `CompactUnitFrame_UpdateAll` keep it in sync when frames are reused for different units.
 6. **Swipe + stacks + timer come from the aura object.** `GetAuraDataByIndex` returns `.expirationTime`/`.duration` (remaining-time) and the stack count as **`.applications`** (fallback `.charges`) on 2.5.x — NOT `.count`. 
-   - **Swipe (default):** a native `Cooldown` widget on the overlay, created **with the `"CooldownFrameTemplate"`** (VERIFIED on this client: every working addon — BigDebuffs, ClassicAuraDurations, SweepyBoop — creates it that way; a bare `CreateFrame("Cooldown")` has NO swipe texture, so the sweep ran but rendered nothing — our round-4 bug). Driven with `CooldownFrame_Set(cd, expirationTime - duration, duration, true)`, configured `SetAlpha(1)`, `SetSwipeColor(0,0,0,0.7)` (BigDebuffs), `SetDrawEdge(false)`, `SetDrawBling(false)`, **`SetReverse(true)`** (client-correct sweep direction — every working addon sets it; the default sweeps the wrong way: the icon lightens instead of darkening — round-5 user feedback), `SetHideCountdownNumbers(true)` **and `noCooldownCount = true`** (the OmniCC-style opt-out — countdown add-ons leave a widget with `noCooldownCount` alone; without it OmniCC draws its own numbers on the swipe that the addon cannot hide). The client animates the darkening sweep itself — no Lua timer; re-`Set` on each refresh keeps it in sync when the buff is refreshed. `CooldownFrame_Clear(cd)` when `duration` ≤ 0.
+   - **Swipe (default):** a native `Cooldown` widget on the overlay, created **with the `"CooldownFrameTemplate"`** (VERIFIED on this client: every working addon — BigDebuffs, ClassicAuraDurations, SweepyBoop — creates it that way; a bare `CreateFrame("Cooldown")` has NO swipe texture, so the sweep ran but rendered nothing — our round-4 bug). Driven with `CooldownFrame_Set(cd, expirationTime - duration, duration, true)`, configured `SetAlpha(1)`, `SetSwipeColor(0,0,0,0.7)` (BigDebuffs), `SetDrawEdge(false)`, `SetDrawBling(false)`, **`SetReverse(true)`** (client-correct sweep direction — every working addon sets it; the default sweeps the wrong way: the icon lightens instead of darkening — round-5 user feedback), `SetHideCountdownNumbers(true)` **and `noCooldownCount = true`** (the OmniCC-style opt-out — countdown add-ons leave a widget with `noCooldownCount` alone; without it OmniCC draws its own numbers on the swipe that the addon cannot hide). The client animates the darkening sweep itself — no Lua timer; re-`Set` on each refresh keeps it in sync when the buff is refreshed. `CooldownFrame_Clear(cd)` when `duration` ≤ 0 **or `showSwipe` is off** (settings window: "Clockwise darkening"; the icon then shows without the swipe).
    - **Stacks:** the `stacks` FontString shows `aura.applications or aura.charges` when > 1 (standard buff UX).
    - **Digital timer (opt-in):** the `timer` FontString shows `expirationTime - GetTime()` ("N"/"m:ss") only when `showTimer` is on (`/bb timer`, default off).
 7. **Frames module is UI-only.** Keep the matching/overlay logic in `Classes/Frames.lua`; the decision logic (which frames, enabled?) reads settings. Unit tests will target the non-UI parts (Settings, Events, bootstrap).
@@ -199,7 +199,8 @@ Before writing or running tests, read the `unit-testing` skill
 
 | Command | Action |
 |---|---|
-| `/bb` | Show status (enabled, scale, party/raid toggles, timer) + re-apply now |
+| `/bb` | Show status (enabled, scale, party/raid toggles, timer, swipe) + re-apply now |
+| `/bb options` | Toggle the settings window (drag, close, help "?", reset, sliders, checkboxes) |
 | `/bb enable` / `/bb disable` | Enable/disable the addon |
 | `/bb timer` | Toggle the digital countdown on the overlay (default off; the cooldown swipe is always shown) |
 | `/bb debug` | Toggle verbose logging; always dumps tracked-overlay state (positions, cooldown swipe, stacks/timer text, raw aura fields) — the in-game diagnostic for overlay issues |
@@ -211,10 +212,13 @@ Before writing or running tests, read the `unit-testing` skill
 
 ```lua
 BloomBuddyDB = {
-    enabled   = true,   -- master switch
-    scale     = 1.5,    -- icon size multiplier (baseSize * scale)
-    party     = true,   -- scale on party frames
-    raid      = true,   -- scale on raid frames
-    showTimer = false,  -- digital countdown on the overlay (default off; the cooldown swipe is always shown)
+    enabled     = true,   -- master switch
+    scale       = 1.5,    -- icon size multiplier (baseSize * scale)
+    party       = true,   -- scale on party frames
+    raid        = true,   -- scale on raid frames
+    showTimer   = false,  -- digital countdown on the overlay (default off; the cooldown swipe is always shown)
+    showSwipe   = true,   -- native cooldown swipe on the overlay (false → clear+hide, icon only)
+    overlayPosX = 0,      -- stub: persisted, NOT applied yet (future overlay repositioning)
+    overlayPosY = 0,      -- stub: persisted, NOT applied yet (future overlay repositioning)
 }
 ```

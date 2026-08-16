@@ -95,9 +95,22 @@ timer/stacks). Phase 2 (raid) verified the frames are nil outside a raid — pen
 
 ## Phase 3 — Settings UI, polish, tests, release
 
-### Tasks
+### Sub-phase 3a — Settings UI window (`.agents/docs/settings-ui-plan.md`)
 
-- [ ] **Interface Options panel** (Interface Options → AddOns → BloomBuddy), native Settings API (`Settings.RegisterCanvasLayoutCategory`; legacy `InterfaceOptions_AddCategory` is nil on 2.5.5): master switch, scale slider, party/raid checkboxes. All strings via `BB.L` (enUS/ruRU). See the `wow-api-20506` skill for the UI gotchas (BackdropTemplate mixin, `GetChildren()` wrap, slider label).
+**Goal:** a minimal Blizzard-style settings window opened with `/bb options` (lazy creation, vanilla widgets, standalone dialog — ADR 9).
+
+- [x] Contract updated FIRST: `CONTEXT.md` (settings + `/bb options`), `ARCHITECTURE.md` (2.5 OptionsUI section + ADRs 9/10).
+- [x] `Data/DefaultSettings.lua`: `showSwipe = true` (functional), `overlayPosX = 0` / `overlayPosY = 0` (persisted stubs) — migration via existing `deepMerge`/`ensureDefaults`.
+- [x] `Classes/Settings.lua`: `Settings:reset()` (restore defaults + persist).
+- [x] `Classes/Frames.lua`: `showSwipe = false` → `CooldownFrame_Clear` + hide, skip `Set` (only functional core change); `/bb debug` settings line gains `showSwipe`.
+- [x] `Data/Localization.lua`: new enUS + ruRU strings (window, labels, tooltips, reset message); `status`/`help` updated.
+- [x] `Classes/OptionsUI.lua`: window + `/bb options` (drag, close, help "?", reset, size slider live, position sliders persist-only, showSwipe/showTimer checkboxes, sync on open).
+- [x] `BloomBuddy.toc` — unchanged (no new files).
+- [ ] **In-game verification pending** (user): window opens/drags/closes; help tooltip; reset re-syncs; size slider live; position sliders persist across `/reload`; checkboxes toggle swipe + timer; `/bb status` reflects changes; zero errors with `/console scriptErrors 1`.
+
+### Remaining Phase 3 tasks (after 3a)
+
+- [ ] **Interface Options panel** (Interface Options → AddOns → BloomBuddy), native Settings API (`Settings.RegisterCanvasLayoutCategory`; legacy `InterfaceOptions_AddCategory` is nil on 2.5.5): master switch, scale slider, party/raid checkboxes. All strings via `BB.L` (enUS/ruRU). See the `wow-api-20506` skill for the UI gotchas (BackdropTemplate mixin, `GetChildren()` wrap, slider label). *(Note: ADR 9 now favors the standalone window — an Options-panel variant is optional, not required.)*
 - [ ] **Automated unit tests** (`Tests/`, mirroring the ArenaChillPrep harness): read the `unit-testing` skill first. Cover bootstrap, Data, Utils, Settings, Events (non-UI). Target ≥ 90% coverage of non-UI modules.
 - [ ] **Polish:** tooltips, default handling, `CHANGELOG.md`, final `README.md`.
 - [ ] **Release:** `tools/deploy.ps1 -Bundle` → CurseForge/Wago zip.

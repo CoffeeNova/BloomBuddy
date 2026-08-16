@@ -111,4 +111,21 @@ function Settings:set(path, value)
     current[segments[#segments]] = value;
 end
 
+--- Restore every setting to its default value and persist the result.
+--- Saved values are discarded; nested default tables are re-created so the
+--- structure matches Data/DefaultSettings.lua exactly.
+function Settings:reset()
+    local defaults = BB.Data.DefaultSettings;
+    local data = BB.Utils.Tables:shallowCopy(defaults);
+
+    for key, value in pairs(defaults) do
+        if (type(value) == "table") then
+            data[key] = BB.Utils.Tables:deepMerge({}, value);
+        end
+    end
+
+    self.Data = data;
+    BloomBuddyDB = self.Data;
+end
+
 return BB;
