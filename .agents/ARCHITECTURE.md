@@ -126,7 +126,8 @@ It carries three children:
   **`"CooldownFrameTemplate"`** (required on this client for the swipe texture — every working addon
   uses it; a bare `CreateFrame("Cooldown")` has no swipe texture). Driven with
   `CooldownFrame_Set(cooldown, expirationTime - duration, duration, true)` when `duration > 0`
-  (else `CooldownFrame_Clear`). Configured `SetAlpha(1)`, `SetSwipeColor(0,0,0,0.7)` (plain darkening sweep),
+  AND `showSwipe` is on (else `CooldownFrame_Clear` + hide — the "Clockwise darkening" checkbox in
+  the settings window; the icon then shows without the swipe). Configured `SetAlpha(1)`, `SetSwipeColor(0,0,0,0.7)` (plain darkening sweep),
   `SetDrawEdge(false)`, `SetDrawBling(false)`, **`SetReverse(true)`** (client-correct sweep direction),
   `SetHideCountdownNumbers(true)`, and
   `noCooldownCount = true` (opt-out for countdown add-ons like OmniCC — without it they draw
@@ -151,14 +152,68 @@ enabled — covers cases the hook/events miss.
 **Frame-name → setting mapping.** Frame names starting with `CompactPartyFrame` are gated by the
 `party` setting; `CompactRaid*` by `raid`.
 
-### 2.5 `Classes/OptionsUI.lua` — slash commands + status
+### 2.5 `Classes/OptionsUI.lua` — slash commands + status + options window
 
-- `/bb` — prints status (`enabled`, `scale`, `party`, `raid`, `timer`) and re-applies now (returns the scaled-icon count).
+- `/bb` — prints status (`enabled`, `scale`, `party`, `raid`, `timer`, `swipe`) and re-applies now (returns the scaled-icon count).
+- `/bb options` — toggles the **settings window** (see below).
 - `/bb enable` / `/bb disable` — writes `enabled` through `BB.Settings`.
 - `/bb timer` — toggles `showTimer` (digital countdown on the overlay; default off).
 - `/bb debug` — toggles `BB.debug` (verbose logging).
 - `/bb help` — command list.
-- A full **Interface Options panel** (master switch, scale slider, party/raid checkboxes) is a later phase (Phase 3 of the development plan). All strings go through `BB.L`.
+- All strings go through `BB.L`.
+
+**Settings window** (lazily created on the first `/bb options`; deliberate **standalone dialog,
+NOT an Interface Options category** — ADR 9). Vanilla widgets only:
+
+- Window: `CreateFrame("Frame", "BloomBuddyOptionsFrame", UIParent, "UIPanelDialogTemplate")`
+  (pattern proven by OmniCC_Config `preview.lua:19`). The frame IS named (template children use
+  `$parent`-based names — e.g. `$parentTitleBG` — an unnamed frame risks bad globals).
+  `SetAlpha(0.9)` (90 % opaque), `SetClampedToScreen(true)`, `SetMovable(true)`,
+  `SetToplevel(true)`; drag = `OnMouseDown` → `StartMoving()` / `OnMouseUp` →
+  `StopMovingOrSizing()`.
+- Close: the template ships its **own** close button on this client, but it is **NOT
+  reliably reachable via the `$parentCloseButton` global** (round-2 feedback 2026-08-17:
+  the name lookup came back nil while a second X was still visible). The window's children
+  are enumerated right after `CreateFrame` (before any of our own buttons exist): the
+  first `Button` child IS the template's close button — reused, repositioned explicitly
+  (`TOPRIGHT (2, -2)`), `OnClick` → `Hide()`; any further Button strays are hidden, and
+  our own `UIPanelCloseButton` is created only when the template has none. Exactly ONE
+  close button, always (two overlapping X buttons were user feedback 2026-08-16 AND
+  2026-08-17).
+- Title: window title FontString centered on `$parentTitleBG`'s CENTER (the template's title
+  band; fallback `TOP (0, -18)`).
+- Help: named "?" button top-left, anchored to the WINDOW `TOPLEFT (CORNER_INSET, -CORNER_INSET)`
+  (`CORNER_INSET = 10`) — fully INSIDE the template's border ring (≈10 px, calibrated by
+  OmniCC_Config's `TOPLEFT (10, -27)` content inset), mirroring the X's visually rendered
+  position. NOT anchored to the band's left edge (round-3: the band can sit inset from the
+  frame edge) and NOT flush to the corner (round-4: at (2,-2) the button's background
+  overlapped the border ring — feedback 2026-08-17). `GameTooltip` on hover
+  (one `AddLine` per `/bb` command), hidden on leave.
+- Reset: `UIPanelButtonTemplate`, centered at the bottom. Anchored `TOP` to the last
+  checkbox's BOTTOM with x-offset `+checkBlockHalfWidth(timerCheck)` — the checkbox
+  CENTER is offset by the label-compensation, so a plain x=0 drifted the button left of
+  the window axis (round-3 feedback 2026-08-17); the +offset puts it back on the axis →
+  `Settings:reset()` + control re-sync + `Frames:checkNow()` + chat confirmation.
+- Layout constants: `CONTENT_TOP_PADDING` (window TOP → first slider
+  LABEL TOP), `ROW_GAP` (**one uniform vertical gap between every adjacent row** —
+  revised 2026-08-17 from feedback: spacing was uneven), `BOTTOM_PADDING`. Slider rows are
+  label + gap + slider; each next row anchors to the previous row's BOTTOM with `ROW_GAP`
+  after the row's own label, so every visual gap equals `ROW_GAP` exactly. `WINDOW_HEIGHT`
+  is computed from the constants (3 slider rows + 2 checkbox rows + Reset + 5 × `ROW_GAP`),
+  so the layout always fits. Element order: title bar → three centered sliders (Icon size,
+  Position X, Position Y — labels above) → two centered checkboxes (label right of the check,
+  block centered via `GetStringWidth`) → centered Reset.
+- Sliders (`OptionsSliderTemplate`; named — the template creates `<name>Low`/`<name>High`
+  but NOT `<name>Text` on this client, so labels are manual FontStrings; LoseControltbc_anni
+  confirms the Low/High globals):
+  - "Icon size" 1.0–3.0 step 0.1 → `Settings:set("scale", ...)` + `Frames:checkNow()` (live);
+  - "Position X"/"Position Y" −40..40 step 1 → persist `overlayPosX`/`overlayPosY` ONLY,
+    no apply (stub); tooltip "Not implemented yet".
+  - `OnValueChanged` fires from `SetValue` too — guarded by a `_syncing` flag during `sync()`.
+- Checkboxes (`UICheckButtonTemplate` + manual label FontStrings — AtlasLootClassic pattern):
+  - "Clockwise darkening" → `showSwipe` + `Frames:checkNow()` (live);
+  - "Show remaining time" → `showTimer` + `Frames:checkNow()` (live).
+- `sync()` reads every control value from `BB.Settings` each time the window opens.
 
 ### 2.6 `Utils/Tables.lua`, `Utils/Timers.lua`
 
@@ -210,6 +265,7 @@ sequenceDiagram
 | `aura.applications`/`expirationTime` missing (secret/unexpected) | `tonumber` guard + `duration > 0` / `remaining > 0` checks → swipe cleared, text blank, no error |
 | Addon disabled | `apply()` returns 0 immediately — no scanning, no overlay work |
 | `party` or `raid` toggle off | Frames of that type are skipped (name prefix decides the type) |
+| `showSwipe` off | The overlay icon shows without the cooldown swipe (Cooldown widget cleared + hidden) |
 | Compact frame reused for a different unit | The hook + `UNIT_AURA` + ticker re-evaluate the overlay for the new unit |
 | Frame is forbidden or hidden | Overlay skipped (guarded `frame:IsForbidden()` / `frame:IsShown()`) |
 | `SecureHook` unavailable | Manual global wrapper fallback (`orig(...)` then handler) |
@@ -228,6 +284,8 @@ sequenceDiagram
 6. **Settings via dot paths.** `Settings:get("scale")` — trivial to extend (e.g. a future per-frame scale).
 7. **Swipe is the default remaining-time display; digital is opt-in.** The native `Cooldown` widget is the proven client pattern (BigDebuffs, ClassicAuraDurations, M6) and animates without Lua. The digital countdown (`showTimer`, default off, `/bb timer`) is the alternative for users who prefer numbers.
 8. **Port ArenaChillPrep's infrastructure, not its features.** The `BB` vararg chain, `Events`/`Settings`/`Timers`/`Tables` modules, `.agents/` tooling and test conventions are a lean port from the sibling addon (same client) — keep them consistent.
+9. **Standalone options window, not an Interface Options panel (ADR, 2026-08).** The legacy `InterfaceOptions_AddCategory` is nil on this client and the modern `Settings.RegisterCanvasLayoutCategory` chain is heavier than the feature needs. A minimal `UIPanelDialogTemplate` window (`/bb options`, lazy creation) delivers the same settings with less code and no registration API risk. Vanilla widgets only (no Ace) — `OptionsSliderTemplate` (with manual labels), `UICheckButtonTemplate`, `UIPanelButtonTemplate`, `UIPanelCloseButton`, `GameTooltip`.
+10. **`showSwipe` is a real setting; `overlayPosX/Y` are persisted stubs.** The swipe toggle is functional from day one (clear+hide the Cooldown widget). Position sliders only persist values for a future phase that actually repositions the overlay — the settings UI surface is complete, the behavior is intentionally deferred.
 
 ---
 

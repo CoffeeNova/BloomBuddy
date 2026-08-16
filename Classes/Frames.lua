@@ -198,14 +198,17 @@ end
 
 --- Update the overlay's cooldown swipe, stacks and (optional) timer text from
 --- the aura data. Missing/secret values are guarded (swipe cleared, text blank).
+--- The swipe respects `showSwipe` (settings window: "Clockwise darkening") —
+--- when off, the Cooldown widget is cleared and hidden, leaving the plain icon.
 ---@param overlay table
 ---@param aura table
 local function updateOverlay(overlay, aura)
     if (overlay.cooldown) then
+        local showSwipe = BB.Settings:get("showSwipe") ~= false;
         local duration = aura and tonumber(aura.duration) or 0;
         local remaining = (aura and aura.expirationTime and (aura.expirationTime - GetTime())) or 0;
 
-        if (duration and duration > 0 and remaining and remaining > 0) then
+        if (showSwipe and duration > 0 and remaining > 0) then
             CooldownFrame_Set(overlay.cooldown, aura.expirationTime - duration, duration, true);
             overlay.cooldown:Show();
         else
@@ -432,7 +435,9 @@ function Frames:dumpOverlays()
     end
 
     lines[#lines + 1] = string.format(
-        "settings: showTimer=%s", tostring(BB.Settings:get("showTimer") ~= false)
+        "settings: showTimer=%s showSwipe=%s",
+        tostring(BB.Settings:get("showTimer") ~= false),
+        tostring(BB.Settings:get("showSwipe") ~= false)
     );
 
     BB:print(table.concat(lines, "\n"));
