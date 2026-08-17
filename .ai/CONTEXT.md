@@ -69,6 +69,15 @@ BloomBuddy/
 │   ├── Settings.lua          # SavedVariables wrapper (BloomBuddyDB)
 │   ├── Frames.lua            # CORE: Lifebloom detection + icon scaling (party/raid)
 │   └── OptionsUI.lua         # /bb slash commands + status + options window (/bb options)
+├── Media/                    # Shipped images (addon-list icon via TOC ## IconTexture:)
+│   ├── GameIconBB.png        # The in-game addon icon (replaces the empty icon; PNG is
+│   │                         # proven on this client - Questie ships one)
+│   └── GameIconBB.tga        # Source upload (not shipped - not referenced by the TOC)
+│                             # PATTERN (researched 2026-08-18, addons on this client):
+│                             # use ## IconTexture: with a FULL virtual path
+│                             # (Interface\AddOns\BloomBuddy\Media\GameIconBB.png).
+│                             # ## IconFile: is NOT honored on 2.5.6 - NO working addon
+│                             # uses it (that was the red-"?" bug).
 └── Utils/                    # Utilities
     ├── Tables.lua            # Table helpers (deepMerge, shallowCopy)
     └── Timers.lua            # Named timers via C_Timer (after/interval/cancel)
