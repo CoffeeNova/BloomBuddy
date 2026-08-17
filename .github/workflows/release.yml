@@ -11,6 +11,16 @@
 #                 `## X-Curse-Project-ID:` line; API token from the CF_API_KEY
 #                 secret)
 #
+# Pushes that touch ONLY infra paths (docs, tooling, CI config - see the
+# `paths-ignore` list below) do NOT trigger a release: the bundle contains
+# exactly the game artifacts, so such commits cannot change it.
+# Escape hatches:
+#   - put `[skip ci]` (or `[ci skip]`) in a commit message to skip a run even
+#     when addon code changes (native GitHub feature). Caveat: a `v*` tag
+#     pointing at a `[skip ci]` commit is skipped too - use workflow_dispatch
+#     to force such a release.
+#   - workflow_dispatch runs the pipeline unconditionally.
+#
 # Secrets required: CF_API_KEY (CurseForge project API token). Everything else
 # runs on the built-in GITHUB_TOKEN.
 
@@ -20,6 +30,20 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
+    # Skip the pipeline for infra-only pushes. `paths-ignore` applies to both
+    # branch and tag pushes; a v* tag on an infra-only commit is skipped too
+    # (force such a release via workflow_dispatch).
+    paths-ignore:
+      - ".ai/**"
+      - ".github/**"
+      - "AGENTS.md"
+      - "README.md"
+      - "CHANGELOG.md"
+      - ".gitignore"
+      - ".env.example"
+      - "luahelper.json"
+      - "dist/**"
+      - "Tests/**"
   workflow_dispatch:
 
 concurrency:

@@ -106,7 +106,11 @@ the game artifacts — the same file set as a client deploy. `dist/` is never co
 `.github/workflows/release.yml` — GitHub Actions. Note: this is the ONE path that
 stays under `.github/` (a platform requirement — Actions must live in
 `.github/workflows/`); the AI library lives in `.ai/`). Auto-releases on every
-push to `main`, on `v*` tag pushes, and on manual dispatch:
+push to `main`, on `v*` tag pushes, and on manual dispatch. Pushes that touch
+ONLY infra paths (`.ai/**`, `.github/**`, `AGENTS.md`, `README.md`,
+`CHANGELOG.md`, `.gitignore`, `.env.example`, `luahelper.json`, `dist/**`,
+`Tests/**`) are filtered out via the trigger's `paths-ignore` — they cannot
+change the release bundle, so no release is built or published:
 
 1. **Version** — from git tags, common CurseForge notation `vMAJOR.MINOR.PATCH`:
    on a tag push that exact version is used (skipped if the release already
@@ -127,6 +131,13 @@ push to `main`, on `v*` tag pushes, and on manual dispatch:
    Requires the **`CF_API_KEY`** repo secret (CurseForge project API token);
    without it the job is skipped with a warning. The pipeline was verified live
    against the versions endpoint (2026-08-15): 2.5.6 = id 16533.
+
+Escape hatches for the auto-trigger (both documented in the workflow header):
+- `[skip ci]` / `[ci skip]` in a commit message skips the run even for addon-code
+  changes (native GitHub feature). Caveat: a `v*` tag pointing at a `[skip ci]`
+  commit is also skipped — force such a release with a manual dispatch instead.
+- `workflow_dispatch` (repo → Actions → "Release" → "Run workflow") runs the
+  pipeline unconditionally (e.g. to publish a version on an infra-only commit).
 
 ---
 
