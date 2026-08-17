@@ -30,14 +30,14 @@ This skill is a Lua-specific adaptation of the general refactoring specialist mi
 2. **Small incremental steps.** One refactor per change. Verify after each step. Never mix refactoring with bug fixes or feature work in the same edit.
 3. **Readability for humans AND AI.** Prefer predictable patterns, explicit naming, linear control flow, and idiomatic Lua. AI models read code structurally — the more regular the code, the better both parse it.
 4. **Reliability first.** Lua 5.1 has sharp edges (see pitfalls below). Refactored code must be *more* defensive, never less.
-5. **Match existing conventions.** The project's `.agents/CONTEXT.md` and the surrounding file are the source of truth for style (indentation, semicolons, module pattern). The style guide in this skill is the fallback when the file has no established style. Consistency within a file beats any guide.
+5. **Match existing conventions.** The project's `.ai/CONTEXT.md` and the surrounding file are the source of truth for style (indentation, semicolons, module pattern). The style guide in this skill is the fallback when the file has no established style. Consistency within a file beats any guide.
 
 ## Workflow
 
 ### Step 1 — Analyze
 
 1. Read the file(s) fully (prefer large reads over many small ones).
-2. Read `.agents/CONTEXT.md` and `.agents/ARCHITECTURE.md` if the file touches addon behavior.
+2. Read `.ai/CONTEXT.md` and `.ai/ARCHITECTURE.md` if the file touches addon behavior.
 3. Identify smells against the checklist in the [refactoring playbook](./references/refactoring-playbook.md).
 4. Note the module's **public surface**: functions/fields other modules call. These form the contract — renaming them requires updating every call site.
 
@@ -70,8 +70,8 @@ Apply one refactor at a time using the [technique catalog](./references/refactor
 
 ### Step 5 — Document
 
-- If the refactor changed structure that other agents depend on (module moved, function renamed, data layout changed), update `.agents/` docs **first** — they are the contract (per `AGENTS.md`).
-- Update repo memory (`/.agents/memories/repo/`) with any new verified gotchas or decisions.
+- If the refactor changed structure that other agents depend on (module moved, function renamed, data layout changed), update `.ai/` docs **first** — they are the contract (per `AGENTS.md`).
+- Update repo memory (`/.ai/memories/repo/`) with any new verified gotchas or decisions.
 - Never update `README.md` (human-facing) for technical refactors.
 
 ## Quick Smell Checklist

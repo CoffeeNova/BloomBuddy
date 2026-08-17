@@ -36,7 +36,7 @@ timer/stacks). Phase 2 (raid) verified the frames are nil outside a raid — pen
 - [x] `Classes/Events.lua`, `Classes/Settings.lua` (ported, `BB` global, `BloomBuddyDB`).
 - [x] `Classes/Frames.lua` — core skeleton: spellID detection, compact-frame overlay, safety ticker.
 - [x] `Classes/OptionsUI.lua` — `/bb` slash commands + status.
-- [x] AI library: `AGENTS.md`, `.agents/` (CONTEXT, ARCHITECTURE, agents, skills, prompts, tools, docs), `.env.example`, `.gitignore`, `LICENSE`, `luahelper.json`, `README.md`, `CHANGELOG.md`.
+- [x] AI library: `AGENTS.md`, `.ai/` (CONTEXT, ARCHITECTURE, agents, skills, prompts, tools, docs), `.env.example`, `.gitignore`, `LICENSE`, `luahelper.json`, `README.md`, `CHANGELOG.md`.
 
 ### Definition of Done
 
@@ -51,7 +51,7 @@ timer/stacks). Phase 2 (raid) verified the frames are nil outside a raid — pen
 
 **Goal:** on raid-style (compact) party frames, a member with Lifebloom shows an enlarged Lifebloom icon.
 
-> **Design revision (2026-08, client research):** the original plan (resize `PartyMemberFrame<N>.BuffFrame.Buff<K>.Icon` via `SetSize`) is replaced by an **overlay icon** on compact frames — on 2.5.6 native compact-frame buff icons are C-rendered and cannot be resized per-buff (verified: BigDebuffs code comment + zero `CompactUnitFrame_UpdateBuff` references; SweepyBoop's overlay pattern). See `.agents/skills/unit-frame-buffs/SKILL.md`.
+> **Design revision (2026-08, client research):** the original plan (resize `PartyMemberFrame<N>.BuffFrame.Buff<K>.Icon` via `SetSize`) is replaced by an **overlay icon** on compact frames — on 2.5.6 native compact-frame buff icons are C-rendered and cannot be resized per-buff (verified: BigDebuffs code comment + zero `CompactUnitFrame_UpdateBuff` references; SweepyBoop's overlay pattern). See `.ai/skills/unit-frame-buffs/SKILL.md`.
 
 ### Tasks
 
@@ -62,7 +62,7 @@ timer/stacks). Phase 2 (raid) verified the frames are nil outside a raid — pen
 - [x] Harden `Classes/Frames.lua` compact-party path (frame filter, overlay lifecycle, `pcall`-guarded creation).
 - [x] Confirm the overlay placement/size in game (anchor constant `OVERLAY_ANCHOR`, `OVERLAY_BASE_SIZE`); adjust from user feedback. (Overlay shows; size/position tuning awaited.)
 - [x] Add `/bb debug` diagnostics: `compact scan: showing N overlay(s)` per scan. ✅
-- [x] Update `.agents/` docs first if the design changes (contract-first).
+- [x] Update `.ai/` docs first if the design changes (contract-first).
 - [x] **Overlay timer + stacks** (user request 2026-08-15): default display is a native **cooldown swipe** (darkening clockwise, C-driven); a **digital countdown** is opt-in (`showTimer`, default off, `/bb timer`). Stacks come from `aura.applications or aura.charges` (`.count` is NOT the field on this client — fixed after user feedback: stacks were invisible).
 
 ### Definition of Done
@@ -84,7 +84,7 @@ timer/stacks). Phase 2 (raid) verified the frames are nil outside a raid — pen
 - [x] Harden the raid path in `Classes/Frames.lua` (same overlay machinery as party; frame-name gate: `CompactRaid*` → `raid` setting).
 - [ ] Confirm overlay placement on a raid frame (same anchor as party; adjust from user feedback).
 - [x] Add `/bb debug` diagnostics: `compact scan: showing N overlay(s)` (shared with party). ✅
-- [x] Update `.agents/` docs first if the design changes.
+- [x] Update `.ai/` docs first if the design changes.
 
 ### Definition of Done
 
@@ -95,7 +95,7 @@ timer/stacks). Phase 2 (raid) verified the frames are nil outside a raid — pen
 
 ## Phase 3 — Settings UI, polish, tests, release
 
-### Sub-phase 3a — Settings UI window (`.agents/docs/settings-ui-plan.md`)
+### Sub-phase 3a — Settings UI window (`.ai/docs/settings-ui-plan.md`)
 
 **Goal:** a minimal Blizzard-style settings window opened with `/bb options` (lazy creation, vanilla widgets, standalone dialog — ADR 9).
 

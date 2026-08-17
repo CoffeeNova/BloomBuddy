@@ -1,9 +1,9 @@
 # BloomBuddy — Context (for AI agents)
 
-> Source of truth: this directory (`.agents/`). Entry point: `AGENTS.md` at the repo root.
+> Source of truth: this directory (`.ai/`). Entry point: `AGENTS.md` at the repo root.
 > This file is the main source of context when working on the addon. **Read `ARCHITECTURE.md` before changing any code.**
 
-**Current status:** v0.1 in development — design changed after client research (2026-08): on TBC Anniversary 2.5.6 the native buff icons on **compact frames** (raid frames and raid-style party frames) are **rendered by the game engine (C)**, so a single buff icon cannot be resized via Lua. The core feature is implemented as a **custom Lifebloom overlay icon** drawn on the compact frame (the pattern proven by SweepyBoop on the same client). Remaining time is shown as a native **cooldown swipe** (darkening clockwise, C-driven; toggleable via `showSwipe`); a **digital countdown is opt-in** (`showTimer`, default off, `/bb timer`). The overlay shows the **stack count** (`aura.applications`, hidden at ≤ 1). Core mechanics verified in game (2026-08-15): spell ID `33763` (R1), the `CompactUnitFrame_UpdateAll` hook, the `CompactPartyFrameMember<N>` frames, show/hide on apply, `/bb enable`/`disable`. Round-3 feedback (2026-08-15): stacks render but the cooldown swipe was not visible and OmniCC (installed on the tester's client) drew countdown numbers that `/bb timer` could not hide — fixed via `noCooldownCount = true` + show-before-sweep ordering + a `/bb debug` overlay dump; **final acceptance pending**. The **settings window** (`.agents/docs/settings-ui-plan.md`) is implemented: `/bb options` opens a minimal Blizzard-style dialog (drag, close, help tooltip, reset, size slider live-applied, position sliders persisted-but-inert, showSwipe/showTimer checkboxes). Round-2 UI feedback (2026-08-17): the template's close button is NOT reachable via the `$parentCloseButton` global (two overlapping X's again — fixed via child enumeration, exactly ONE X) and the row spacing was uneven (fixed: one uniform `ROW_GAP` between every adjacent row, window height computed). Round-3 UI feedback (2026-08-17): the "?" help button sat away from the top-left corner (the title band is inset from the frame edge — now anchored to the window corner `TOPLEFT (2, -2)`) and the Reset button drifted left of center (the check box's own center is offset by its label compensation — now anchored with a `+checkBlockHalfWidth` X-offset). Round-4 UI feedback (2026-08-17): at the corner the "?" background overlapped the template's ~10 px border ring — now anchored `TOPLEFT (CORNER_INSET, -CORNER_INSET)` with `CORNER_INSET = 10`, fully inside the border and visually mirrored to the X. **In-game verification pending.**
+**Current status:** v0.1 in development — design changed after client research (2026-08): on TBC Anniversary 2.5.6 the native buff icons on **compact frames** (raid frames and raid-style party frames) are **rendered by the game engine (C)**, so a single buff icon cannot be resized via Lua. The core feature is implemented as a **custom Lifebloom overlay icon** drawn on the compact frame (the pattern proven by SweepyBoop on the same client). Remaining time is shown as a native **cooldown swipe** (darkening clockwise, C-driven; toggleable via `showSwipe`); a **digital countdown is opt-in** (`showTimer`, default off, `/bb timer`). The overlay shows the **stack count** (`aura.applications`, hidden at ≤ 1). Core mechanics verified in game (2026-08-15): spell ID `33763` (R1), the `CompactUnitFrame_UpdateAll` hook, the `CompactPartyFrameMember<N>` frames, show/hide on apply, `/bb enable`/`disable`. Round-3 feedback (2026-08-15): stacks render but the cooldown swipe was not visible and OmniCC (installed on the tester's client) drew countdown numbers that `/bb timer` could not hide — fixed via `noCooldownCount = true` + show-before-sweep ordering + a `/bb debug` overlay dump; **final acceptance pending**. The **settings window** (`.ai/docs/settings-ui-plan.md`) is implemented: `/bb options` opens a minimal Blizzard-style dialog (drag, close, help tooltip, reset, size slider live-applied, position sliders persisted-but-inert, showSwipe/showTimer checkboxes). Round-2 UI feedback (2026-08-17): the template's close button is NOT reachable via the `$parentCloseButton` global (two overlapping X's again — fixed via child enumeration, exactly ONE X) and the row spacing was uneven (fixed: one uniform `ROW_GAP` between every adjacent row, window height computed). Round-3 UI feedback (2026-08-17): the "?" help button sat away from the top-left corner (the title band is inset from the frame edge — now anchored to the window corner `TOPLEFT (2, -2)`) and the Reset button drifted left of center (the check box's own center is offset by its label compensation — now anchored with a `+checkBlockHalfWidth` X-offset). Round-4 UI feedback (2026-08-17): at the corner the "?" background overlapped the template's ~10 px border ring — now anchored `TOPLEFT (CORNER_INSET, -CORNER_INSET)` with `CORNER_INSET = 10`, fully inside the border and visually mirrored to the X. **In-game verification pending.**
 
 ---
 
@@ -48,11 +48,11 @@ BloomBuddy is intentionally tiny. It has ONE job:
 
 ```
 BloomBuddy/
-├── AGENTS.md                 # Agent entry point → read .agents/ (this directory)
+├── AGENTS.md                 # Agent entry point → read .ai/ (this directory)
 ├── BloomBuddy.toc            # TOC (Interface: 20506, SavedVariables: BloomBuddyDB)
 ├── bootstrap.lua             # Entry point: global BB table, event frame, initialization
 ├── README.md                 # Human-facing description (users) — not technical docs
-├── .agents/                  # Agent documentation & instructions (source of truth)
+├── .ai/                  # Agent documentation & instructions (source of truth)
 │   ├── CONTEXT.md            # This file: context, conventions, gotchas, settings
 │   ├── ARCHITECTURE.md       # Architecture: modules, data flow, decisions
 │   ├── agents/               # Agent definitions (bloom-developer, ...)
@@ -89,7 +89,7 @@ and its path must never be hardcoded here.
 - `.env` is git-ignored (machine-specific). `.env.example` documents the variable.
 - Scripts that need the path read it from the environment:
   - `tools/research.ps1` — searches the working addons (default root = `$env:addons_path_anniversary`, override with `-Root`).
-  - `tools/load-env.ps1` — loads `.env` into the session (dot-source it: `. .\.agents\tools\load-env.ps1`).
+  - `tools/load-env.ps1` — loads `.env` into the session (dot-source it: `. .\.ai\tools\load-env.ps1`).
   - `tools/deploy.ps1` — deploys the addon to the client (see below).
 - To test in game: run `tools/deploy.ps1` — it copies **only the game artifacts**
   (the `.toc` + every file it references + `LICENSE`) into `%addons_path_anniversary%\BloomBuddy`,
@@ -105,7 +105,7 @@ the game artifacts — the same file set as a client deploy. `dist/` is never co
 
 `.github/workflows/release.yml` — GitHub Actions. Note: this is the ONE path that
 stays under `.github/` (a platform requirement — Actions must live in
-`.github/workflows/`); the AI library lives in `.agents/`). Auto-releases on every
+`.github/workflows/`); the AI library lives in `.ai/`). Auto-releases on every
 push to `main`, on `v*` tag pushes, and on manual dispatch:
 
 1. **Version** — from git tags, common CurseForge notation `vMAJOR.MINOR.PATCH`:
@@ -152,7 +152,7 @@ The **luahelper MCP** server is the repo's static-analysis gate for all Lua code
   `---@type` underlines) are the same annotation noise produced by the sibling
   `ArenaChillPrep` repo and are **expected** here — do not churn code to silence them.
 - Config lives in `luahelper.json` at the repo root (ignored modules listed in
-  `ignoreModules`, e.g. `SecureHook`, `SlashCmdList`; `.agents/` and `Tests/` excluded).
+  `ignoreModules`, e.g. `SecureHook`, `SlashCmdList`; `.ai/` and `Tests/` excluded).
 - Fix loop: run → fix errors/warnings → re-run → until only informational type-18
   messages remain.
 
@@ -162,9 +162,9 @@ The **luahelper MCP** server is the repo's static-analysis gate for all Lua code
 
 The addon will mirror the test harness proven in the sibling workspace `ArenaChillPrep`
 (`Tests/`, run under LuaJIT — Lua 5.1, the same version WoW uses). It does **not** exist
-yet; it is Phase 3 of the development plan (`.agents/docs/addon-v1-development-plan.md`).
+yet; it is Phase 3 of the development plan (`.ai/docs/addon-v1-development-plan.md`).
 Before writing or running tests, read the `unit-testing` skill
-(`.agents/skills/unit-testing/SKILL.md`).
+(`.ai/skills/unit-testing/SKILL.md`).
 
 ---
 

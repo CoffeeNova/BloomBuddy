@@ -1,6 +1,6 @@
 # BloomBuddy — gotchas (verified on the client)
 
-Client-verified pitfalls for the WoW TBC Anniversary (Interface 20506 / 2.5.x) client. These are ALSO mirrored in `.agents/skills/wow-api-20506/SKILL.md` and `.agents/skills/unit-frame-buffs/SKILL.md` — keep all three in sync.
+Client-verified pitfalls for the WoW TBC Anniversary (Interface 20506 / 2.5.x) client. These are ALSO mirrored in `.ai/skills/wow-api-20506/SKILL.md` and `.ai/skills/unit-frame-buffs/SKILL.md` — keep all three in sync.
 
 ## Settings window templates (2026-08-16, read from working addons)
 

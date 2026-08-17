@@ -79,7 +79,7 @@ BB.Events:fire(event, ...)
 
 ### 2.3 `Classes/Settings.lua` and `Data/DefaultSettings.lua`
 
-- `BloomBuddyDB` — SavedVariables (see `.agents/CONTEXT.md`).
+- `BloomBuddyDB` — SavedVariables (see `.ai/CONTEXT.md`).
 - `Settings:get(path)` / `Settings:set(path, value)` — access by dot path (`"scale"`, `"party"`).
 - On load — deep merge of defaults and saved data (robust against new settings added in future versions) + `ensureDefaults` migration.
 
@@ -283,7 +283,7 @@ sequenceDiagram
 5. **Match the full rank list.** Lifebloom R1/R2/R3 are distinct spellIDs; matching all three avoids missing icons.
 6. **Settings via dot paths.** `Settings:get("scale")` — trivial to extend (e.g. a future per-frame scale).
 7. **Swipe is the default remaining-time display; digital is opt-in.** The native `Cooldown` widget is the proven client pattern (BigDebuffs, ClassicAuraDurations, M6) and animates without Lua. The digital countdown (`showTimer`, default off, `/bb timer`) is the alternative for users who prefer numbers.
-8. **Port ArenaChillPrep's infrastructure, not its features.** The `BB` vararg chain, `Events`/`Settings`/`Timers`/`Tables` modules, `.agents/` tooling and test conventions are a lean port from the sibling addon (same client) — keep them consistent.
+8. **Port ArenaChillPrep's infrastructure, not its features.** The `BB` vararg chain, `Events`/`Settings`/`Timers`/`Tables` modules, `.ai/` tooling and test conventions are a lean port from the sibling addon (same client) — keep them consistent.
 9. **Standalone options window, not an Interface Options panel (ADR, 2026-08).** The legacy `InterfaceOptions_AddCategory` is nil on this client and the modern `Settings.RegisterCanvasLayoutCategory` chain is heavier than the feature needs. A minimal `UIPanelDialogTemplate` window (`/bb options`, lazy creation) delivers the same settings with less code and no registration API risk. Vanilla widgets only (no Ace) — `OptionsSliderTemplate` (with manual labels), `UICheckButtonTemplate`, `UIPanelButtonTemplate`, `UIPanelCloseButton`, `GameTooltip`.
 10. **`showSwipe` is a real setting; `overlayPosX/Y` are persisted stubs.** The swipe toggle is functional from day one (clear+hide the Cooldown widget). Position sliders only persist values for a future phase that actually repositions the overlay — the settings UI surface is complete, the behavior is intentionally deferred.
 

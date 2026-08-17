@@ -55,7 +55,7 @@
   "ignoreFileOrDir": [
     ".vscode/",
     "Tests/",
-    ".agents/"
+    ".ai/"
   ],
   "requirePathSeparator": ".",
   "enableReport": true

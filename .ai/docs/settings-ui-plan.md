@@ -1,7 +1,7 @@
 # BloomBuddy — Phase: Settings UI Window
 
 > Phase plan for the settings window (a sub-phase of Phase 3 in `addon-v1-development-plan.md`).
-> Contract-first: `.agents/CONTEXT.md` + `ARCHITECTURE.md` are updated BEFORE code (see the
+> Contract-first: `.ai/CONTEXT.md` + `ARCHITECTURE.md` are updated BEFORE code (see the
 > `phase-workflow` skill). This file is the task list + Definition of Done for this phase.
 
 **Goal:** a minimal Blizzard-style settings window, opened with `/bb options` (lazy creation
@@ -109,7 +109,7 @@ new keys appear for users with an existing `BloomBuddyDB`.
 7. `BloomBuddy.toc` — NO change (no new files).
 8. Verify: `vararg-check.ps1`, `syntax-check.ps1`, luahelper MCP (file + project).
 9. Deploy: `deploy.ps1` → in-game check; `deploy.ps1 -Bundle` → `dist/` zip.
-10. Memory: append phase record to `.agents/memories/repo/`.
+10. Memory: append phase record to `.ai/memories/repo/`.
 
 ## Definition of Done
 

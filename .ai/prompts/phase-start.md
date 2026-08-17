@@ -8,8 +8,8 @@ Start **[Phase N — Name]** for the BloomBuddy addon (WoW TBC Anniversary, Inte
 
 **READ FIRST (in this order):**
 1. `AGENTS.md` (repo root) — entry point.
-2. `.agents/CONTEXT.md`, `.agents/ARCHITECTURE.md` — source of truth.
-3. Repo memory `/.agents/memories/repo/` (main file + gotchas/decisions/phases).
+2. `.ai/CONTEXT.md`, `.ai/ARCHITECTURE.md` — source of truth.
+3. Repo memory `/.ai/memories/repo/` (main file + gotchas/decisions/phases).
 4. The relevant skill(s): `wow-api-20506`, `unit-frame-buffs`, `addon-research`, `debug-cycle`, `settings-savedvars`, `phase-workflow` (and `lua-refactoring` for code cleanup).
 
 **Context (already done, phases 0 done and verified):**
@@ -23,7 +23,7 @@ Start **[Phase N — Name]** for the BloomBuddy addon (WoW TBC Anniversary, Inte
 **Definition of Done:** [paste the phase's Definition of Done]
 
 **Workflow:**
-1. Follow the `phase-workflow` skill: contract-first, todo list, implement per conventions, update `.agents/` first when behavior changes, update repo memory.
+1. Follow the `phase-workflow` skill: contract-first, todo list, implement per conventions, update `.ai/` first when behavior changes, update repo memory.
 2. Verify: no editor errors; run `tools/vararg-check.ps1` (and `tools/syntax-check.ps1` if a Lua interpreter is available).
 3. Finish with: list of changed/created files, in-game verification steps (exact commands + expected output), and any expectations/limitations.
 

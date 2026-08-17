@@ -5,7 +5,7 @@
 #                 notation: vMAJOR.MINOR.PATCH tags; patch is bumped from the
 #                 latest tag when pushing to main without a tag)
 #   2. bundle   - set the TOC version, build BloomBuddy-<version>.zip via
-#                 .agents/tools/deploy.ps1 -Bundle (same artifact set as a deploy)
+#                 .ai/tools/deploy.ps1 -Bundle (same artifact set as a deploy)
 #   3. release  - create the GitHub release (v<version>) with the zip attached
 #   4. curseforge - upload the zip to CurseForge (project id from the TOC
 #                 `## X-Curse-Project-ID:` line; API token from the CF_API_KEY
@@ -110,7 +110,7 @@ jobs:
       - name: Build release bundle
         shell: pwsh
         run: |
-          .\.agents\tools\deploy.ps1 -Bundle -OutDir dist
+          .\.ai\tools\deploy.ps1 -Bundle -OutDir dist
           Get-ChildItem dist | ForEach-Object {
             Write-Host "  $($_.Name) ($([math]::Round($_.Length / 1KB, 1)) KB)"
           }

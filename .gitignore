@@ -5,7 +5,7 @@ Tests/luacov.report.out
 # Local development environment (machine-specific paths). Copy .env.example → .env.
 .env
 
-# Release bundles built by .agents/tools/deploy.ps1 -Bundle.
+# Release bundles built by .ai/tools/deploy.ps1 -Bundle.
 dist/
 
 # Compiled Lua sources (luajit -b output)
