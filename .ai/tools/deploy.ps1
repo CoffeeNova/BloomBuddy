@@ -104,13 +104,16 @@ if ($Bundle) {
     $zip = Join-Path $OutDir ("{0}-{1}.zip" -f $addonName, $version)
     if (Test-Path $zip) { Remove-Item $zip -Force }
 
-    # Zip entries must be relative to the addon folder (no leading path).
+    # Zip entries must be relative to the addon folder, wrapped in a folder named
+    # after the addon so the package extracts as <addon>/file1, file2, ... (the
+    # layout CurseForge/WoW expect), not a flat pile of files.
     $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("bb-deploy-" + [guid]::NewGuid().ToString("N"))
-    New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+    $root = Join-Path $tmp $addonName
+    New-Item -ItemType Directory -Path $root -Force | Out-Null
     try {
         foreach ($f in $files) {
             $rel = $f.Substring($repoRoot.Length + 1)
-            $dest = Join-Path $tmp $rel
+            $dest = Join-Path $root $rel
             New-Item -ItemType Directory -Path (Split-Path -Parent $dest) -Force | Out-Null
             Copy-Item $f $dest -Force
         }
