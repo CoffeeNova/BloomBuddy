@@ -71,4 +71,4 @@ Machine-specific paths live in `.env` at the repo root (copy `.env.example` → 
 
 ## Why this repo looks the way it does
 
-This repository is a lean, adapted port of the development toolkit proven in the sibling addon **ArenaChillPrep** (same client, same module conventions). The `.ai/` library, the `Data/Utils/Classes` split, the `BB` vararg chain and the tooling are intentionally shared patterns — keep them consistent when you extend this addon.
+The `.ai/` library, the `Data/Utils/Classes` split, the `BB` vararg chain and the tooling are intentionally shared patterns — keep them consistent when you extend this addon.
