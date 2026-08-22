@@ -68,6 +68,34 @@ $version = (Get-Content $toc.FullName | Where-Object { $_ -match '^## Version:\s
 if (-not $version) { $version = "0.0.0" }
 $addonName = $toc.BaseName
 
+# --- Addon-list icon from the TOC --------------------------------------------
+# ## IconTexture: / ## IconFile: metadata references the addon-list icon.
+# The `##` lines are excluded from the file list above, so pull the icon in
+# explicitly. IconTexture is a virtual texture path; when it points into this
+# addon's own folder (Interface\AddOns\<addon>\...) it maps to a repo file.
+# IconFile (relative path) is the fallback. Game-texture paths
+# (Interface\Icons\...) reference Blizzard files and are not shipped.
+$iconRef = (Get-Content $toc.FullName | Where-Object { $_ -match '^## (IconTexture|IconFile):\s*(.+)$' } |
+    ForEach-Object { $Matches[2].Trim() } | Select-Object -First 1)
+if ($iconRef) {
+    $rel = ""
+    if ($iconRef -match "(?i)^Interface\\AddOns\\$addonName\\(.+)$") {
+        $rel = $Matches[1]
+    }
+    elseif ($iconRef -notmatch "^Interface") {
+        $rel = $iconRef
+    }
+    if ($rel) {
+        $iconSrc = Join-Path $repoRoot $rel
+        if (Test-Path $iconSrc) {
+            $files += $iconSrc
+        }
+        else {
+            Write-Warning "TOC references missing icon file: $iconRef"
+        }
+    }
+}
+
 # --- Deploy mode -------------------------------------------------------------
 if ($Bundle) {
     if (-not $OutDir) { $OutDir = Join-Path $repoRoot "dist" }

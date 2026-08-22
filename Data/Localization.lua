@@ -1,7 +1,3 @@
--- BloomBuddy — Data/Localization
--- UI strings. L has a metatable fallback to the key itself when a translation
--- is missing, so a missing string never crashes and is easy to spot in chat.
-
 ---@type BB
 local _, BB = ...;
 
@@ -15,74 +11,97 @@ local DefaultLocale = "enUS";
 local strings = {
     enUS = {
         loaded = "v%s loaded",
+
         status = "enabled: %s | scale: %.1fx | party: %s | raid: %s | timer: %s | swipe: %s",
-        help = "BloomBuddy commands: status, options, enable, disable, timer, debug, help",
+
+        help = "BloomBuddy commands: /bb, /bb options, /bb status, /bb enable, /bb disable, /bb timer, /bb debug, /bb help",
+
         unknownCommand = "Unknown command: %s. Type /bb help",
+
         enabled = "Addon enabled",
         disabled = "Addon disabled",
+
         debugToggled = "Debug logging: %s",
         timerToggled = "Digital countdown: %s",
-        scaledIcons = "Scaled %d Lifebloom icon(s)",
 
-        -- Options window (/bb options)
-        panelTitle = "BloomBuddy",
         optionsReset = "Settings reset to defaults",
+
+        panelTitle = "BloomBuddy",
+
         optionsHelpTitle = "BloomBuddy commands",
-        optionsHelpStatus = "/bb — status + re-apply",
+        optionsHelpStatus = "/bb — open settings",
         optionsHelpOptions = "/bb options — open settings",
-        optionsHelpEnable = "/bb enable | disable — toggle addon",
-        optionsHelpTimer = "/bb timer — digital countdown",
+        optionsHelpEnable = "/bb enable | disable — enable or disable the addon",
+        optionsHelpTimer = "/bb timer — toggle the digital countdown",
         optionsHelpDebug = "/bb debug — verbose logging",
         optionsHelpHelp = "/bb help — command list",
+
+        sizeLabel = "Icon size:",
+
+        positionXLabel = "Position X:",
+        positionXHelp = "Move the icon left or right inside the raid frame.",
+
+        positionYLabel = "Position Y:",
+        positionYHelp = "Move the icon up or down inside the raid frame.",
+
         swipeLabel = "Clockwise darkening",
         timerLabel = "Show remaining time",
-        sizeLabel = "Icon size:",
-        positionXLabel = "Position X:",
-        positionYLabel = "Position Y:",
+
         resetButton = "Reset to defaults",
-        positionNotImplemented = "Not implemented yet",
-        positionStubNote = "Value is saved, the overlay does not move yet",
     },
+
     ruRU = {
         loaded = "v%s загружен",
-        status = "включён: %s | масштаб: %.1fx | party: %s | raid: %s | timer: %s | swipe: %s",
-        help = "BloomBuddy команды: status, options, enable, disable, timer, debug, help",
+
+        status = "включён: %s | масштаб: %.1fx | party: %s | raid: %s | таймер: %s | затемнение: %s",
+
+        help = "BloomBuddy команды: /bb, /bb options, /bb status, /bb enable, /bb disable, /bb timer, /bb debug, /bb help",
+
         unknownCommand = "Неизвестная команда: %s. Введите /bb help",
+
         enabled = "Аддон включён",
         disabled = "Аддон выключен",
+
         debugToggled = "Отладка: %s",
         timerToggled = "Цифровой отсчёт: %s",
-        scaledIcons = "Увеличено иконок Lifebloom: %d",
 
-        -- Options window (/bb options)
-        panelTitle = "BloomBuddy",
         optionsReset = "Настройки сброшены к значениям по умолчанию",
+
+        panelTitle = "BloomBuddy",
+
         optionsHelpTitle = "Команды BloomBuddy",
-        optionsHelpStatus = "/bb — статус и повторное применение",
+        optionsHelpStatus = "/bb — открыть настройки",
         optionsHelpOptions = "/bb options — открыть настройки",
-        optionsHelpEnable = "/bb enable | disable — включить/выключить аддон",
-        optionsHelpTimer = "/bb timer — цифровой отсчёт",
-        optionsHelpDebug = "/bb debug — подробное логирование",
+        optionsHelpEnable = "/bb enable | disable — включить или выключить аддон",
+        optionsHelpTimer = "/bb timer — включить или выключить цифровой таймер",
+        optionsHelpDebug = "/bb debug — подробная отладка",
         optionsHelpHelp = "/bb help — список команд",
-        swipeLabel = "Затемнение по часовой стрелке",
-        timerLabel = "Показывать остаток времени",
+
         sizeLabel = "Размер иконки:",
+
         positionXLabel = "Позиция X:",
+        positionXHelp = "Перемещает иконку влево или вправо внутри рейд-фрейма.",
+
         positionYLabel = "Позиция Y:",
+        positionYHelp = "Перемещает иконку вверх или вниз внутри рейд-фрейма.",
+
+        swipeLabel = "Затемнение по часовой стрелке",
+        timerLabel = "Показывать оставшееся время",
+
         resetButton = "Сбросить настройки",
-        positionNotImplemented = "Пока не реализовано",
-        positionStubNote = "Значение сохраняется, оверлей пока не двигается",
     },
 };
 
----@class Localization
 local L = setmetatable({}, {
     __index = function(_, key)
-        local table_ = strings[locale] or strings[DefaultLocale];
-        local value = table_[key];
+        local table_ =
+            strings[locale]
+            or strings[DefaultLocale];
 
-        if (value == nil) then
-            -- Missing translation — fall back to the key so it stands out.
+        local value =
+            table_[key];
+
+        if value == nil then
             return tostring(key);
         end
 
@@ -91,7 +110,6 @@ local L = setmetatable({}, {
 });
 
 BB.Data.Localization = L;
--- Convenience alias used by modules (bootstrap, slash commands, UI).
 BB.L = L;
 
 return BB;

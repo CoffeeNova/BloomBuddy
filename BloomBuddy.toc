@@ -1,5 +1,6 @@
 ## Interface: 20506
 ## Title: BloomBuddy
+## IconTexture: Interface\AddOns\BloomBuddy\Media\GameIconBB.png
 ## Notes: Makes the Lifebloom buff icon bigger on party and raid frames (TBC Anniversary).
 ## Author: BloomBuddy
 ## Version: 0.1.0
@@ -7,10 +8,6 @@
 ## X-Curse-Project-ID: 1654106
 ## SavedVariables: BloomBuddyDB
 ## DefaultState: enabled
-
-# Load order matters: bootstrap first, then Data/Utils, then Classes.
-# Every file receives the shared BB table through the `...` vararg chain
-# (each module file must end with `return BB;`).
 
 bootstrap.lua
 
